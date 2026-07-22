@@ -34,5 +34,11 @@ jobs:
             --output text > .keys/monitoring.pem
           chmod 600 .keys/monitoring.pem
 
+      - name: Show discovered EC2 inventory
+        run: ansible-inventory --graph
+
+      - name: Test SSH connectivity
+        run: ansible all -m ping
+
       - name: Run Ansible playbook
         run: ansible-playbook playbooks/site.yml
