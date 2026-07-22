@@ -1,0 +1,38 @@
+name: Ansible Deploy
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+
+jobs:
+  deploy:
+    name: Deploy monitoring stack
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ansible
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          pip install boto3 botocore ansible
+          ansible-galaxy collection install amazon.aws community.docker
+
+      - name: Fetch SSH key from SSM
+        run: |
+          mkdir -p .keys
+          aws ssm get-parameter \
+            --name /monitoring/ssh-private-key \
+            --with-decryption \
+            --query Parameter.Value \
+            --output text > .keys/monitoring.pem
+          chmod 600 .keys/monitoring.pem
+
+      - name: Run Ansible playbook
+        run: ansible-playbook playbooks/site.yml

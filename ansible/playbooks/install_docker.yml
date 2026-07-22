@@ -1,0 +1,24 @@
+---
+- name: Install Docker on all monitoring hosts
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install Docker and Python Docker SDK
+      dnf:
+        name:
+          - docker
+          - python3-docker
+        state: present
+
+    - name: Enable and start Docker daemon
+      systemd:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Add ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: true

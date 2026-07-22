@@ -1,0 +1,30 @@
+---
+- name: Deploy Grafana and Pushgateway
+  hosts: frontend
+  become: true
+
+  vars:
+    config_dir: /opt/monitoring
+
+  tasks:
+    - name: Run Grafana
+      community.docker.docker_container:
+        name: grafana
+        image: grafana/grafana:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "3000:3000"
+        env:
+          GF_SECURITY_ADMIN_PASSWORD: "admin"
+        volumes:
+          - "grafana_data:/var/lib/grafana"
+
+    - name: Run Pushgateway
+      community.docker.docker_container:
+        name: pushgateway
+        image: prom/pushgateway
+        state: started
+        restart_policy: always
+        ports:
+          - "9091:9091"

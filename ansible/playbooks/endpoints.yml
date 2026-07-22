@@ -1,0 +1,20 @@
+---
+- name: Print stack endpoints
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Stack endpoints
+      debug:
+        msg:
+          - "============================================"
+          - "  MONITORING STACK READY"
+          - "============================================"
+          - "  Grafana:     http://{{ hostvars[groups['frontend'][0]]['ansible_host'] }}:3000"
+          - "  Pushgateway: http://{{ hostvars[groups['frontend'][0]]['ansible_host'] }}:9091"
+          - "  Prometheus:  http://{{ hostvars[groups['backend'][0]]['ansible_host'] }}:9090"
+          - "  Loki:        http://{{ hostvars[groups['backend'][0]]['ansible_host'] }}:3100"
+          - "============================================"
+          - "  Grafana credentials: admin / admin"
+          - "============================================"
