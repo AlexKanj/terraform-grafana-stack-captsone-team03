@@ -19,6 +19,12 @@ env:
   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   TF_VAR_aws_region: ${{ secrets.AWS_DEFAULT_REGION }}
 
+  # Terraform variables added to the environment for use in the Terraform configuration
+  TF_VAR_instance_type: "t3.small"
+  TF_VAR_project_tag: "monitoring"
+  TF_VAR_frontend_role_tag: "frontend"
+  TF_VAR_backend_role_tag: "backend"
+
 jobs:
   terraform:
     name: Terraform ${{ inputs.action }}
