@@ -1,0 +1,132 @@
+---
+- name: Deploy Team 03 operations portal
+  hosts: frontend
+  become: true
+  gather_facts: false
+
+  vars:
+    portal_root: /opt/team03-portal
+    portal_source_dir: "{{ portal_root }}/source"
+
+    portal_repo_url: >-
+      https://github.com/AlexKanj/mf-ansible-capstone-team03.git
+    portal_repo_version: main
+
+    portal_network: team03-portal
+
+    portal_api_image: team03-portal-api:latest
+    portal_frontend_image: team03-portal-frontend:latest
+
+    prometheus_url: >-
+      http://{{ hostvars[groups['backend'][0]]
+      ['private_ip_address'] }}:9090
+
+    grafana_url: "http://{{ ansible_host }}:3000"
+
+    github_actions_url: >-
+      https://github.com/AlexKanj/mf-ansible-capstone-team03/actions
+
+  tasks:
+    - name: Install Git
+      ansible.builtin.dnf:
+        name: git
+        state: present
+
+    - name: Create portal root directory
+      ansible.builtin.file:
+        path: "{{ portal_root }}"
+        state: directory
+        owner: ec2-user
+        group: ec2-user
+        mode: "0755"
+
+    - name: Clone or update portal source
+      ansible.builtin.git:
+        repo: "{{ portal_repo_url }}"
+        dest: "{{ portal_source_dir }}"
+        version: "{{ portal_repo_version }}"
+        update: true
+        force: true
+      become_user: ec2-user
+
+    - name: Create portal Docker network
+      community.docker.docker_network:
+        name: "{{ portal_network }}"
+        state: present
+
+    - name: Build FastAPI image
+      community.docker.docker_image:
+        name: "{{ portal_api_image }}"
+        source: build
+        force_source: true
+        build:
+          path: "{{ portal_source_dir }}/portal/api"
+          pull: true
+
+    - name: Build React and Nginx image
+      community.docker.docker_image:
+        name: "{{ portal_frontend_image }}"
+        source: build
+        force_source: true
+        build:
+          path: "{{ portal_source_dir }}/portal/frontend"
+          pull: true
+          args:
+            VITE_API_BASE_URL: ""
+            VITE_GRAFANA_URL: "{{ grafana_url }}"
+            VITE_GITHUB_ACTIONS_URL: "{{ github_actions_url }}"
+
+    - name: Run FastAPI container
+      community.docker.docker_container:
+        name: portal-api
+        image: "{{ portal_api_image }}"
+        state: started
+        recreate: true
+        restart_policy: always
+
+        env:
+          PROMETHEUS_URL: "{{ prometheus_url }}"
+
+        networks:
+          - name: "{{ portal_network }}"
+            aliases:
+              - portal-api
+
+        comparisons:
+          networks: strict
+
+    - name: Run React and Nginx container
+      community.docker.docker_container:
+        name: portal-frontend
+        image: "{{ portal_frontend_image }}"
+        state: started
+        recreate: true
+        restart_policy: always
+
+        published_ports:
+          - "80:80"
+
+        networks:
+          - name: "{{ portal_network }}"
+
+        comparisons:
+          networks: strict
+
+    - name: Wait for portal health endpoint
+      ansible.builtin.uri:
+        url: http://127.0.0.1/health
+        method: GET
+        status_code: 200
+        return_content: true
+      register: portal_health
+      retries: 20
+      delay: 3
+      until: portal_health.status == 200
+
+    - name: Display portal URLs
+      ansible.builtin.debug:
+        msg:
+          - "Portal: http://{{ ansible_host }}"
+          - "Health: http://{{ ansible_host }}/health"
+          - "Grafana: {{ grafana_url }}"
+          - "Prometheus API source: {{ prometheus_url }}"

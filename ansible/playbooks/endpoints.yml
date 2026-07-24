@@ -15,6 +15,7 @@
           - "  Pushgateway: http://{{ hostvars[groups['frontend'][0]]['ansible_host'] }}:9091"
           - "  Prometheus:  http://{{ hostvars[groups['backend'][0]]['ansible_host'] }}:9090"
           - "  Loki:        http://{{ hostvars[groups['backend'][0]]['ansible_host'] }}:3100"
+          - "  Portal: http://{{ hostvars[groups['frontend'][0]]['ansible_host'] }}"
           - "============================================"
           - "  Grafana credentials: admin / admin"
           - "============================================"
