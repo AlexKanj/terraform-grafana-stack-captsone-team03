@@ -16,6 +16,7 @@
 
     portal_api_image: team03-portal-api:latest
     portal_frontend_image: team03-portal-frontend:latest
+    portal_github_token: ""
 
     prometheus_url: >-
       http://{{ hostvars[groups['backend'][0]]
@@ -86,6 +87,8 @@
 
         env:
           PROMETHEUS_URL: "{{ prometheus_url }}"
+          GITHUB_REPO: "AlexKanj/mf-ansible-capstone-team03"
+          GITHUB_TOKEN: "{{ portal_github_token }}"
 
         networks:
           - name: "{{ portal_network }}"

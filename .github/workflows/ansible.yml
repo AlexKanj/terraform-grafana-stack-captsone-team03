@@ -41,4 +41,6 @@ jobs:
         run: ansible all -m ping
 
       - name: Run Ansible playbook
-        run: ansible-playbook playbooks/site.yml
+        run: >
+          ansible-playbook playbooks/site.yml
+          -e "portal_github_token=${{ secrets.PORTAL_GITHUB_TOKEN }}"
