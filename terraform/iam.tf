@@ -14,9 +14,6 @@ resource "aws_iam_role" "monitoring_instances" {
     ]
   })
 
-  tags = {
-    Project = var.project_tag
-  }
 }
 
 resource "aws_iam_role_policy" "monitoring_instances" {
