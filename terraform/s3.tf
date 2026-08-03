@@ -43,8 +43,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "racf_state" {
     id     = "expire-noncurrent-racf-state"
     status = "Enabled"
 
-    filter {}
-
     noncurrent_version_expiration {
       noncurrent_days = 90
     }
