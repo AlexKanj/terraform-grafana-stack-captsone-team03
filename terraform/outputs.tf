@@ -10,7 +10,7 @@ output "frontend_private_ip" {
 
 output "backend_ip" {
   description = "Public IP of the backend host (Prometheus + Loki + Promtail)"
-  value       = aws_eip.backend.public_ip
+  value       = aws_instance.backend.public_ip
 }
 
 output "ssm_key_parameter" {
