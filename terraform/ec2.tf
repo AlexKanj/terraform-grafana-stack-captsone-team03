@@ -44,7 +44,6 @@ resource "aws_instance" "frontend" {
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.frontend.id]
   key_name               = aws_key_pair.monitoring.key_name
-  iam_instance_profile   = aws_iam_instance_profile.monitoring_instances.name
 
   tags = {
     Name    = "monitoring-frontend"
@@ -65,17 +64,38 @@ resource "aws_eip" "frontend" {
   depends_on = [aws_internet_gateway.monitoring]
 }
 
+resource "aws_iam_instance_profile_association" "frontend" {
+  instance_id          = aws_instance.frontend.id
+  iam_instance_profile = aws_iam_instance_profile.monitoring_instances.name
+}
+
 resource "aws_instance" "backend" {
   ami                    = data.aws_ami.al2023.id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.backend.id]
   key_name               = aws_key_pair.monitoring.key_name
-  iam_instance_profile   = aws_iam_instance_profile.monitoring_instances.name
 
   tags = {
     Name    = "monitoring-backend"
     Project = var.project_tag
     Role    = var.backend_role_tag
   }
+}
+
+resource "aws_eip" "backend" {
+  instance = aws_instance.backend.id
+  domain   = "vpc"
+
+  tags = {
+    Name    = "monitoring-backend-eip"
+    Project = var.project_tag
+  }
+
+  depends_on = [aws_internet_gateway.monitoring]
+}
+
+resource "aws_iam_instance_profile_association" "backend" {
+  instance_id          = aws_instance.backend.id
+  iam_instance_profile = aws_iam_instance_profile.monitoring_instances.name
 }
