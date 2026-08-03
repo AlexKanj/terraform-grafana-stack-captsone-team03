@@ -17,3 +17,13 @@ output "ssm_key_parameter" {
   description = "SSM Parameter Store path for the SSH private key"
   value       = aws_ssm_parameter.ssh_private_key.name
 }
+
+output "racf_state_bucket_name" {
+  description = "S3 bucket used to store managed RACF users and groups"
+  value       = aws_s3_bucket.racf_state.id
+}
+
+output "racf_state_bucket_arn" {
+  description = "ARN of the RACF managed-state S3 bucket"
+  value       = aws_s3_bucket.racf_state.arn
+}
