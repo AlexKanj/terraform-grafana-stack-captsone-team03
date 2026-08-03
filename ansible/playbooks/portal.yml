@@ -18,6 +18,12 @@
     portal_frontend_image: team03-portal-frontend:latest
     portal_github_token: ""
 
+    racf_state_bucket: ""
+    racf_state_key: "racf/managed-state.json"
+    aws_access_key_id: ""
+    aws_secret_access_key: ""
+    aws_default_region: ""
+
     prometheus_url: >-
       http://{{ hostvars[groups['backend'][0]]
       ['private_ip_address'] }}:9090
@@ -89,6 +95,11 @@
           PROMETHEUS_URL: "{{ prometheus_url }}"
           GITHUB_REPO: "AlexKanj/mf-ansible-capstone-team03"
           GITHUB_TOKEN: "{{ portal_github_token }}"
+          RACF_STATE_BUCKET: "{{ racf_state_bucket }}"
+          RACF_STATE_KEY: "{{ racf_state_key }}"
+          AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+          AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+          AWS_DEFAULT_REGION: "{{ aws_default_region }}"
 
         networks:
           - name: "{{ portal_network }}"

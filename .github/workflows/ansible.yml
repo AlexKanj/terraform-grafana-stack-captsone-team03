@@ -44,3 +44,8 @@ jobs:
         run: >
           ansible-playbook playbooks/site.yml
           -e "portal_github_token=${{ secrets.PORTAL_GITHUB_TOKEN }}"
+          -e "racf_state_bucket=${{ vars.RACF_STATE_BUCKET }}"
+          -e "racf_state_key=${{ vars.RACF_STATE_KEY }}"
+          -e "aws_access_key_id=$AWS_ACCESS_KEY_ID"
+          -e "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"
+          -e "aws_default_region=$AWS_DEFAULT_REGION"
