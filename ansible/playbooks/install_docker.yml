@@ -11,11 +11,38 @@
           - python3-docker
         state: present
 
+    - name: Create Docker CLI plugin directory
+      ansible.builtin.file:
+        path: /usr/local/lib/docker/cli-plugins
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Install Docker Compose CLI plugin
+      ansible.builtin.get_url:
+        url: >-
+          https://github.com/docker/compose/releases/download/v5.1.2/docker-compose-linux-x86_64
+        dest: /usr/local/lib/docker/cli-plugins/docker-compose
+        owner: root
+        group: root
+        mode: "0755"
+
     - name: Enable and start Docker daemon
       systemd:
         name: docker
         enabled: true
         state: started
+
+    - name: Verify Docker Compose installation
+      ansible.builtin.command:
+        cmd: docker compose version
+      register: docker_compose_version
+      changed_when: false
+
+    - name: Display Docker Compose version
+      ansible.builtin.debug:
+        var: docker_compose_version.stdout
 
     - name: Add ec2-user to docker group
       user:
